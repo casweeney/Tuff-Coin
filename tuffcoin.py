@@ -1,27 +1,35 @@
-# Module 1 - Create a Blockchain
+# Module 2 - Create a Crytocurrency
 
 # To be installed: pip install Flask==0.12.2
 # Flask
 # Postman HTTP Client
+# requests==2.18.4: pip install requests==2.18.4
 
 # Importing the libraries
 import datetime
 import hashlib
 import json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+import requests
+from uuid import uuid4
+from urllib.parse import urlparse
 
 # Part 1 - Building a Blockchain
 
 class Blockchain:
     def __init__(self):
         self.chain = []
+        self.transactions = []
         self.create_block(proof = 1, previous_hash = '0')
+        self.nodes = set()
         
     def create_block(self, proof, previous_hash):
         block = {'index': len(self.chain) + 1,
                  'timestamp': str(datetime.datetime.now()),
                  'proof': proof,
-                 'previous_hash': previous_hash}
+                 'previous_hash': previous_hash,
+                 'transactions': self.transactions}
+        self.transactions = []
         self.chain.append(block)
         return block
     
@@ -58,6 +66,17 @@ class Blockchain:
             previous_block = block
             block_index += 1
         return True
+    
+    def add_transaction(self, sender, receiver, amount):
+        self.transactions.append({'sender': sender,
+                                  'receiver': receiver,
+                                  'amount': amount})
+        previous_block = self.get_previous_block()
+        return previous_block['index'] + 1
+    
+    def add_node(self, address):
+        parsed_url = urlparse(address)
+        self.nodes.add(parsed_url.netloc)
 
 
 
@@ -104,6 +123,9 @@ def is_valid():
     else:
         response = {'message': 'We have a problem, The Blockchain is not valid'}
     return jsonify(response), 200
+
+
+#Part 3 - Decentralizing Our Blockchain
 
 
 #Running the App
